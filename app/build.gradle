@@ -4,6 +4,7 @@ apply plugin: 'kotlin-parcelize'
 
 android {
     compileSdkVersion 35
+    ndkVersion "29.0.13113456"
 
     defaultConfig {
         namespace "com.theeasiestway.opusapp"
@@ -11,12 +12,6 @@ android {
         targetSdkVersion 35
         versionCode 1
         versionName "1.0"
-
-        externalNativeBuild {
-            cmake {
-                cppFlags ""
-            }
-        }
     }
 
     buildTypes {
@@ -37,8 +32,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':opus')
+    implementation project(':easyopus')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "androidx.appcompat:appcompat:1.7.1"
     implementation "androidx.core:core-ktx:1.16.0"

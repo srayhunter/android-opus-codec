@@ -1,3 +1,4 @@
 rootProject.name='Opus'
 include ':app'
+include ':easyopus'
 include ':opus'

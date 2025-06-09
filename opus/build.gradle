@@ -1,11 +1,8 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-parcelize'
 
 android {
-    ndkVersion "28.1.13356709"
-
     compileSdkVersion 35
+    ndkVersion "29.0.13113456"
 
     defaultConfig {
         namespace "com.theeasiestway.opus"
@@ -14,14 +11,13 @@ android {
         versionCode 1
         versionName "1.0"
 
-        externalNativeBuild {
-            cmake {
-                cppFlags ""
-            }
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_17
+            targetCompatibility JavaVersion.VERSION_17
+        }
 
-            ndk {
-                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-            }
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
     }
 
@@ -33,24 +29,24 @@ android {
     }
 
     externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "4.0.2"
+        ndkBuild {
+            path "src/main/jni/Android.mk"
         }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
     }
 }
 
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "androidx.core:core-ktx:1.16.0"
+tasks.register('copyReleaseLibsToEasyOpus', Copy) {
+    def outputDir = "../easyopus/src/main/cpp/libs"
+    from(fileTree(dir: "build/intermediates/cxx/Release", include: "**/obj/local/**/*.so")) {
+        eachFile { file ->
+            def idx = file.relativePath.segments.findIndexOf { it == 'local' }
+            if (idx >= 0 && file.relativePath.segments.size() > idx + 1) {
+                def newSegments = file.relativePath.segments[(idx + 1)..-1]
+                file.relativePath = new RelativePath(true, *newSegments)
+            }
+        }
+        includeEmptyDirs = false
+    }
+    into(outputDir)
+    dependsOn 'externalNativeBuildRelease'
 }
