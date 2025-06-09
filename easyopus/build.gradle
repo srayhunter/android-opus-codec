@@ -1,0 +1,63 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-parcelize'
+
+android {
+    compileSdkVersion 35
+    ndkVersion "29.0.13113456"
+
+    defaultConfig {
+        namespace "com.theeasiestway.opus"
+        minSdkVersion 26
+        targetSdkVersion 35
+        versionCode 1
+        versionName "1.0"
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "4.0.2"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "androidx.core:core-ktx:1.16.0"
+}
+
+afterEvaluate {
+    project(':opus').tasks.matching { it.name == 'copyReleaseLibsToEasyOpus' }.configureEach { copyTask ->
+        tasks.named('preBuild').configure {
+            dependsOn copyTask
+        }
+    }
+}
+
+tasks.named('preBuild').configure {
+    dependsOn project(':opus').tasks.named('copyReleaseLibsToEasyOpus')
+}
+
